@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DreamStyle 交互系统</title>
+    <style>
+        :root {
+            --primary-color: #7CFC00; /* Dream风格绿色 */
+            --secondary-color: #5CB800;
+            --error-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196F3;
+            --admin-color: #9C27B0;
+            --mention-color: #FFF59D;
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+            --container-bg: white;
+            --font-size: 16px;
+            --dream-green: #7CFC00;
+            --dream-dark: #1a1a1a;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: var(--font-size);
+            transition: all 0.3s ease;
+            background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), 
+                            url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="50" height="50" x="0" y="0" fill="%237CFC00" opacity="0.1"/><rect width="50" height="50" x="50" y="50" fill="%237CFC00" opacity="0.1"/></svg>');
+        }
+        
+        /* Dream风格Logo */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            background-color: var(--dream-dark);
+            border-radius: 50%;
+            position: relative;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        
+        .logo::before {
+            content: "";
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background-color: var(--dream-green);
+            top: 15px;
+            left: 10px;
+            border-radius: 50% 50% 0 0;
+        }
+        
+        .logo::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            top: 20px;
+            left: 20px;
+            box-shadow: 20px 0 white;
+        }
+        
+        /* 进度条 */
+        .progress-container {
+            flex-grow: 1;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--dream-green);
+            transition: width 0.5s ease;
+            background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
+            background-size: 1rem 1rem;
+            animation: progressAnimation 1s linear infinite;
+        }
+        
+        @keyframes progressAnimation {
+            0% { background-position: 1rem 0; }
+            100% { background-position: 0 0; }
+        }
+        
+        /* 主容器 */
+        .container {
+            background-color: var(--container-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        /* 标题样式 */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        /* 选项网格布局 */
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option-box {
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+        
+        .option-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-color: var(--primary-color);
+        }
+        
+        /* 输入区域 */
+        .input-section {
+            margin-bottom: 25px;
+        }
+        
+        input, select, textarea, button {
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: var(--font-size);
+            transition: all 0.3s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 12px;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .admin-btn {
+            background-color: var(--admin-color);
+        }
+        
+        .admin-btn:hover {
+            background-color: #7b1fa2;
+        }
+        
+        /* 隐藏类 */
+        .hidden {
+            display: none;
+        }
+        
+        /* 消息样式 */
+        .error {
+            color: var(--error-color);
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .warning {
+            color: var(--warning-color);
+            background-color: #fff8e1;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .success {
+            color: var(--primary-color);
+            background-color: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .info {
+            color: var(--info-color);
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .admin-message {
+            color: var(--admin-color);
+            background-color: #f3e5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid var(--admin-color);
+        }
+        
+        /* 论坛消息 */
+        .forum-message {
+            background-color: #f9f9f9;
+            padding: 12px;
+            margin: 8px 0;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .mention {
+            background-color: var(--mention-color);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        /* 网站链接 */
+        .website-link {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #0066cc;
+            transition: all 0.3s;
+        }
+        
+        .website-link:hover {
+            background-color: #e0f0ff;
+            transform: translateX(5px);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .option-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            input, textarea {
+                width: 100%;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+        
+        /* 设置面板 */
+        .settings-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .setting-option {
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* 用户信息 */
+        .user-info {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* 系统通知区域 */
+        .system-notifications {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo和进度条 -->
+    <div class="logo-container">
+        <div class="logo" onclick="updateProgress()"></div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <!-- 初始选择界面 -->
+    <div id="initialScreen" class="container">
+        <h1>欢迎来到 DreamStyle 交互系统</h1>
+        <div class="option-grid">
+            <div class="option-box" onclick="showRegister()">
+                <h3>我是新用户，没有账号，需注册。</h3>
+                <p>点击创建新账号</p>
+            </div>
+            <div class="option-box" onclick="showLogin()">
+                <h3>我已有账号，要登录。</h3>
+                <p>点击使用现有账号登录</p>
+            </div>
+            <div class="option-box" onclick="showAdminLogin()">
+                <h3>以管理员身份进入</h3>
+                <p>需要管理员密码</p>
+            </div>
+            <div class="option-box" onclick="showGuide('initial')">
+                <h3>使用指引</h3>
+                <p>点击查看系统使用说明</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注册界面 -->
+    <div id="registerScreen" class="container hidden">
+        <h2>用户注册</h2>
+        <div class="input-section">
+            <input type="text" id="newUsername" placeholder="输入账号名称 (至少4个字符)">
+            <input type="password" id="newPassword" placeholder="输入密码 (至少6个字符)">
+            <button onclick="registerUser()">注册</button>
+            <button onclick="backToInitial()">返回</button>
+        </div>
+    </div>
+
+    <!-- 登录界面 -->
+    <div id="loginScreen" class="container hidden">
+        <h2>用户登录</h2>
+        <div class="input-section">
+            <input type="text" id="username" placeholder="输入账号名称">
+            <input type="password" id="password" placeholder="输入密码">
+            <button onclick="loginUser()">登录</button>
+            <button onclick="backToInitial()">返回</button>
+        </div>
+    </div>
+
+    <!-- 管理员登录界面 -->
+    <div id="adminLoginScreen" class="container hidden">
+        <h2>管理员登录</h2>
+        <div class="input-section">
+            <input type="password" id="adminPassword" placeholder="输入管理员密码">
+            <button class="admin-btn" onclick="loginAdmin()">验证</button>
+            <button onclick="backToInitial()">返回</button>
+        </div>
+    </div>
+
+    <!-- 主程序界面 -->
+    <div id="mainScreen" class="container hidden">
+        <h2>DreamStyle 主程序</h2>
+        
+        <!-- 系统通知区域 -->
+        <div class="system-notifications" id="systemNotifications">
+            <div class="info">系统已就绪</div>
+        </div>
+        
+        <!-- 数字输入框 -->
+        <div class="input-section">
+            <p>请输入数字选择功能：</p>
+            <input type="number" id="choiceInput" min="1" max="7" placeholder="输入1-7">
+            <button onclick="processChoice()">确定</button>
+        </div>
+        
+        <!-- 功能输出区域 -->
+        <div id="output"></div>
+        
+        <!-- 全服论坛 -->
+        <div id="forumSection" class="hidden">
+            <h3>全服论坛</h3>
+            <div id="forumMessages"></div>
+            <textarea id="forumInput" placeholder="输入留言 (可使用@用户名提及他人)"></textarea>
+            <button onclick="postForumMessage()">发送</button>
+        </div>
+    </div>
+
+    <!-- 使用指引界面 -->
+    <div id="guideScreen" class="container hidden">
+        <h2>使用指引</h2>
+        <div id="guideContent"></div>
+        <button onclick="closeGuide()">返回</button>
+    </div>
+
+    <script>
+        // 存储系统初始化
+        let users = JSON.parse(localStorage.getItem('dreamStyleUsers')) || [];
+        let currentUser = null;
+        let isAdmin = false;
+        const ADMIN_PASSWORD = "dreamILOVEYOU";
+        const WEBSITES = [
+            { name: "哔哩哔哩", url: "https://www.bilibili.com/" },
+            { name: "火柴人战争二", url: "https://www.4399.com/flash/220929_3.htm" },
+            { name: "第五人格", url: "https://y.4399.com/detail/62?from=1#search3-5a12" },
+            { name: "剪映", url: "https://www.capcut.cn/?account_id=59624584&ad_platform_id=baidusearch_lead&download_channel=jianying_pc_baidu_sem_winmac_1&ug_attr_appid=3704&utm_medium=baidufengchao&ug_semver=v2.0.0&bd_vid=3478412262572706810" },
+            { name: "QQ音乐", url: "https://secure.mydown.com/soft/342/717178342.shtml?f=bdj_730134" },
+            { name: "Python", url: "https://soft.fengyunzhice.cn/softs/python.html?ver=gjc-1&bd_vid=2667626353600933200" },
+            { name: "VS Code", url: "https://code.visualstudio.com/" },
+            { name: "豆包AI", url: "https://www.doubao.com/chat/?channel=baidu_sem&source=dbweb_baidusem_htl_pc_pinp_2&keywordid=973182309690&ad_platform_id=baidusearch_lead&account_id=53653088&a_planid=720987910&a_unitid=10812115429&a_keywordid=973182309690&a_creative=108560718849&a_matchtype=1&a_dongtai=0&a_trig_flag=nm&a_crowdid=0&a_kw_enc_utf8=%E8%B1%86%E5%8C%85a+i&ug_semver=v2.0.0&bd_vid=3150328408099444626" },
+            { name: "百度", url: "https://www.baidu.com/" },
+            { name: "深度求索AI", url: "https://www.deepseek.com/" },
+            { name: "MC阿柴", url: "https://haokan.baidu.com/author/1744492949989580?query=" },
+            { name: "全民枪神", url: "https://www.4399.com/flash/212767.htm" },
+            { name: "火柴人战争3", url: "https://www.4399.com/flash/223797_1.htm" },
+            { name: "4399三国杀", url: "https://my.4399.com/yxsgs/" }
+        ];
+
+        // 初始化进度条
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const randomProgress = Math.floor(Math.random() * 30) + 10;
+            progressBar.style.width = randomProgress + '%';
+            setTimeout(updateProgress, 3000);
+        }
+
+        // 显示注册界面
+        function showRegister() {
+            document.getElementById('initialScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.remove('hidden');
+        }
+
+        // 显示登录界面
+        function showLogin() {
+            document.getElementById('initialScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        // 显示管理员登录界面
+        function showAdminLogin() {
+            document.getElementById('initialScreen').classList.add('hidden');
+            document.getElementById('adminLoginScreen').classList.remove('hidden');
+        }
+
+        // 返回初始界面
+        function backToInitial() {
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('adminLoginScreen').classList.add('hidden');
+            document.getElementById('initialScreen').classList.remove('hidden');
+        }
+
+        // 注册用户
+        function registerUser() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            
+            if (username.length < 4) {
+                alert('账号名称至少需要4个字符');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('密码至少需要6个字符');
+                return;
+            }
+            
+            if (users.some(user => user.username === username)) {
+                alert('该用户名已被使用');
+                return;
+            }
+            
+            users.push({ username, password, isBanned: false, messages: [], settings: {} });
+            localStorage.setItem('dreamStyleUsers', JSON.stringify(users));
+            
+            addSystemNotification(`新用户注册: ${username}`);
+            alert('注册成功！请登录');
+            showLogin();
+        }
+
+        // 用户登录
+        function loginUser() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            const user = users.find(user => user.username === username);
+            
+            if (!user) {
+                alert('用户不存在');
+                return;
+            }
+            
+            if (user.isBanned) {
+                alert('该账号已被封禁');
+                return;
+            }
+            
+            if (user.password !== password) {
+                alert('密码错误');
+                return;
+            }
+            
+            currentUser = user;
+            isAdmin = false;
+            addSystemNotification(`用户登录: ${username}`);
+            showMainScreen();
+        }
+
+        // 管理员登录
+        function loginAdmin() {
+            const password = document.getElementById('adminPassword').value.trim();
+            
+            if (password !== ADMIN_PASSWORD) {
+                alert('管理员密码错误');
+                return;
+            }
+            
+            currentUser = { username: 'ADMIN', isAdmin: true };
+            isAdmin = true;
+            addSystemNotification('管理员已登录', true);
+            showMainScreen();
+        }
+
+        // 显示主界面
+        function showMainScreen() {
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('adminLoginScreen').classList.add('hidden');
+            document.getElementById('mainScreen').classList.remove('hidden');
+            
+            // 显示论坛区域
+            document.getElementById('forumSection').classList.remove('hidden');
+            loadForumMessages();
+            
+            // 显示更新日志
+            showUpdateLog();
+        }
+
+        // 添加系统通知
+        function addSystemNotification(message, isAdminMessage = false) {
+            const notifications = document.getElementById('systemNotifications');
+            const notification = document.createElement('div');
+            notification.className = isAdminMessage ? 'admin-message' : 'info';
+            notification.textContent = message;
+            notifications.prepend(notification);
+            
+            // 限制通知数量
+            if (notifications.children.length > 10) {
+                notifications.removeChild(notifications.lastChild);
+            }
+        }
+
+        // 处理用户选择
+        function processChoice() {
+            const choice = document.getElementById('choiceInput').value;
+            const output = document.getElementById('output');
+            
+            output.innerHTML = '';
+            
+            switch(choice) {
+                case '1':
+                    output.innerHTML = '<h3>网页开发者</h3><p>军衔                           愿我们团队的工作为您带来良好体验，我们将不断改进！</p>';
+                    break;
+                case '2':
+                    showWebsiteLinks();
+                    break;
+                case '3':
+                    showCalculator();
+                    break;
+                case '4':
+                    showUserInfo();
+                    break;
+                case '5':
+                    showSuggestionBox();
+                    break;
+                case '6':
+                    showSettings();
+                    break;
+                case '7':
+                    output.innerHTML = `
+                        <h3>开发中功能</h3>
+                        <div class="warning">
+                            <p>该功能正在开发中，敬请期待！</p>
+                            <p>计划功能：用户账户系统、数据云同步、多语言支持</p>
+                        </div>
+                    `;
+                    break;
+                default:
+                    output.innerHTML = '<div class="error">请输入1-7之间的有效数字！</div>';
+            }
+        }
+
+        // 显示网站链接
+        function showWebsiteLinks() {
+            let html = '<h3>常用网站</h3>';
+            WEBSITES.forEach(site => {
+                html += `<a href="${site.url}" class="website-link" target="_blank">${site.name}</a>`;
+            });
+            document.getElementById('output').innerHTML = html;
+        }
+
+        // 显示计算器
+        function showCalculator() {
+            document.getElementById('output').innerHTML = `
+                <h3>四则运算计算器</h3>
+                <input type="number" id="calcNum1" placeholder="第一个数字">
+                <select id="calcOperator">
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                    <option value="*">×</option>
+                    <option value="/">÷</option>
+                </select>
+                <input type="number" id="calcNum2" placeholder="第二个数字">
+                <button onclick="calculate()">计算</button>
+                <div id="calcResult"></div>
+            `;
+        }
+
+        // 计算功能
+        function calculate() {
+            const num1 = parseFloat(document.getElementById('calcNum1').value);
+            const num2 = parseFloat(document.getElementById('calcNum2').value);
+            const operator = document.getElementById('calcOperator').value;
+            let result;
+            
+            if (isNaN(num1) || isNaN(num2)) {
+                document.getElementById('calcResult').innerHTML = 
+                    '<div class="error">请输入有效的数字！</div>';
+                return;
+            }
+            
+            switch(operator) {
+                case '+':
+                    result = num1 + num2;
+                    break;
+                case '-':
+                    result = num1 - num2;
+                    break;
+                case '*':
+                    result = num1 * num2;
+                    break;
+                case '/':
+                    if (num2 === 0) {
+                        result = '<div class="error">除数不能为零！</div>';
+                    } else {
+                        result = num1 / num2;
+                        result = Math.round(result * 100) / 100;
+                    }
+                    break;
+                default:
+                    result = '<div class="error">无效运算符</div>';
+            }
+            
+            if (typeof result === 'number') {
+                document.getElementById('calcResult').innerHTML = `
+                    <div class="success">
+                        ${num1} ${operator} ${num2} = <strong>${result}</strong>
+                    </div>
+                `;
+            } else {
+                document.getElementById('calcResult').innerHTML = result;
+            }
+        }
+
+        // 显示用户信息
+        function showUserInfo() {
+            if (!currentUser) return;
+            
+            let html = `<h3>个人信息</h3>
+                <div class="user-info">
+                    <p><strong>账号名称:</strong> ${currentUser.username}</p>
+                    <p><strong>账号状态:</strong> ${currentUser.isBanned ? '已封禁' : '正常'}</p>
+                    <h4>我的留言</h4>
+                    <div id="userMessages"></div>
+                </div>`;
+            
+            document.getElementById('output').innerHTML = html;
+            
+            // 显示用户留言
+            const userMessagesDiv = document.getElementById('userMessages');
+            if (currentUser.messages && currentUser.messages.length > 0) {
+                currentUser.messages.forEach(msg => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'forum-message';
+                    msgDiv.innerHTML = `
+                        <p>${msg.text}</p>
+                        <small>${new Date(msg.timestamp).toLocaleString()}</small>
+                    `;
+                    userMessagesDiv.appendChild(msgDiv);
+                });
+            } else {
+                userMessagesDiv.innerHTML = '<p>暂无留言</p>';
+            }
+        }
+
+        // 显示建议框
+        function showSuggestionBox() {
+            document.getElementById('output').innerHTML = `
+                <h3>更新建议</h3>
+                <textarea id="suggestionText" placeholder="请输入您的建议"></textarea>
+                <button onclick="submitSuggestion()">提交建议</button>
+            `;
+        }
+
+        // 提交建议
+        function submitSuggestion() {
+            const suggestion = document.getElementById('suggestionText').value.trim();
+            if (!suggestion) {
+                alert('请输入建议内容');
+                return;
+            }
+            
+            // 在实际应用中，这里应该将建议发送到服务器
+            alert('感谢您的建议！');
+            document.getElementById('suggestionText').value = '';
+        }
+
+        // 显示设置
+        function showSettings() {
+            document.getElementById('output').innerHTML = `
+                <h3>系统设置</h3>
+                <div class="settings-panel">
+                    <div class="setting-option">
+                        <h4>主题颜色</h4>
+                        <select id="themeColor" onchange="changeTheme(this.value)">
+                            <option value="green">Dream绿色</option>
+                            <option value="blue">蓝色</option>
+                            <option value="red">红色</option>
+                            <option value="purple">紫色</option>
+                        </select>
+                    </div>
+                    <div class="setting-option">
+                        <h4>字体大小</h4>
+                        <input type="range" id="fontSize" min="12" max="24" value="16" oninput="changeFontSize(this.value)">
+                        <span id="fontSizeDisplay">16px</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 更改主题
+        function changeTheme(color) {
+            let primary, secondary;
+            switch(color) {
+                case 'blue':
+                    primary = '#2196F3';
+                    secondary = '#0b7dda';
+                    break;
+                case 'red':
+                    primary = '#f44336';
+                    secondary = '#da190b';
+                    break;
+                case 'purple':
+                    primary = '#9C27B0';
+                    secondary = '#7b1fa2';
+                    break;
+                default: // green
+                    primary = '#7CFC00';
+                    secondary = '#5CB800';
+            }
+            
+            document.documentElement.style.setProperty('--primary-color', primary);
+            document.documentElement.style.setProperty('--secondary-color', secondary);
+            
+            // 保存设置
+            if (currentUser) {
+                currentUser.settings.theme = color;
+                saveUsers();
+            }
+        }
+
+        // 更改字体大小
+        function changeFontSize(size) {
+            document.documentElement.style.setProperty('--font-size', size + 'px');
+            document.getElementById('fontSizeDisplay').textContent = size + 'px';
+            
+            // 保存设置
+            if (currentUser) {
+                currentUser.settings.fontSize = size;
+                saveUsers();
+            }
+        }
+
+        // 保存用户数据
+        function saveUsers() {
+            localStorage.setItem('dreamStyleUsers', JSON.stringify(users));
+        }
+
+        // 加载论坛消息
+        function loadForumMessages() {
+            const forumDiv = document.getElementById('forumMessages');
+            forumDiv.innerHTML = '';
+            
+            let allMessages = [];
+            users.forEach(user => {
+                if (user.messages) {
+                    user.messages.forEach(msg => {
+                        allMessages.push({
+                            username: user.username,
+                            text: msg.text,
+                            timestamp: msg.timestamp,
+                            isAdmin: user.username === 'ADMIN'
+                        });
+                    });
+                }
+            });
+            
+            // 按时间排序
+            allMessages.sort((a, b) => b.timestamp - a.timestamp);
+            
+            // 显示消息
+            allMessages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = msg.isAdmin ? 'admin-message' : 'forum-message';
+                
+                // 处理@提及
+                let messageText = msg.text;
+                messageText = messageText.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+                
+                messageDiv.innerHTML = `
+                    <p><strong>${msg.username}:</strong> ${messageText}</p>
+                    <small>${new Date(msg.timestamp).toLocaleString()}</small>
+                `;
+                forumDiv.appendChild(messageDiv);
+            });
+        }
+
+        // 发布论坛消息
+        function postForumMessage() {
+            if (!currentUser) return;
+            
+            const message = document.getElementById('forumInput').value.trim();
+            if (!message) {
+                alert('请输入留言内容');
+                return;
+            }
+            
+            // 添加到用户消息
+            if (!currentUser.messages) currentUser.messages = [];
+            currentUser.messages.push({
+                text: message,
+                timestamp: Date.now()
+            });
+            
+            // 保存
+            saveUsers();
+            
+            // 更新显示
+            document.getElementById('forumInput').value = '';
+            loadForumMessages();
+            
+            // 系统通知
+            addSystemNotification(`${currentUser.username} 发布了新留言`);
+        }
+
+        // 显示更新日志
+        function showUpdateLog() {
+            const output = document.getElementById('output');
+            output.innerHTML = `
+                <h3>更新日志</h3>
+                <ul>
+                    <li><strong>TRY.00.00</strong> - 最初版</li>
+                    <li><strong>TRY.05.07</strong> - 细节处理</li>
+                    <li><strong>TRY.13.79</strong> - 新增功能数字</li>
+                    <li><strong>TRY.20.01</strong> - 功能优化</li>
+                    <li><strong>TRY.21.11</strong> - 保密处理</li>
+                    <li><strong>1.03.00</strong> - 新增设置选项</li>
+                    <li><strong>1.09.88</strong> - 页面重新设计</li>
+                    <li><strong>1.11.27</strong> - 新增用户系统和管理员功能</li>
+                    <li><strong>1.13.00</strong> - 新增全服论坛和@提及功能</li>
+                    <li><strong>1.18.30</strong> - 新增Dream风格主题和Logo</li>
+                    <li><strong>1.19.08</strong> - 新增更多网站链接</li>
+                </ul>
+            `;
+        }
+
+        // 显示使用指引
+        function showGuide(context) {
+            const guideContent = document.getElementById('guideContent');
+            
+            let html = '';
+            if (context === 'initial') {
+                html = `
+                    <h3>DreamStyle 交互系统使用指南</h3>
+                    <p>欢迎使用本系统，这是一个多功能交互平台，提供以下功能：</p>
+                    <ul>
+                        <li><strong>用户系统</strong> - 注册和登录个人账号</li>
+                        <li><strong>网站导航</strong> - 快速访问常用网站</li>
+                        <li><strong>计算器</strong> - 基本四则运算</li>
+                        <li><strong>全服论坛</strong> - 与其他用户交流</li>
+                        <li><strong>个性化设置</strong> - 自定义界面外观</li>
+                    </ul>
+                    <p>请选择登录方式开始使用，或注册新账号。</p>
+                `;
+            } else {
+                html = `
+                    <h3>主程序使用指南</h3>
+                    <p>在主界面中，您可以输入数字选择不同功能：</p>
+                    <ol>
+                        <li><strong>网页开发者</strong> - 查看开发者信息</li>
+                        <li><strong>网站导航</strong> - 访问常用网站</li>
+                        <li><strong>计算器</strong> - 进行基本计算</li>
+                        <li><strong>个人信息</strong> - 查看账号信息和留言</li>
+                        <li><strong>更新建议</strong> - 提交系统改进建议</li>
+                        <li><strong>设置</strong> - 自定义系统外观</li>
+                        <li><strong>开发中功能</strong> - 查看未来计划</li>
+                    </ol>
+                    <p>在全服论坛中，您可以使用@用户名来提及其他用户。</p>
+                `;
+            }
+            
+            guideContent.innerHTML = html;
+            document.getElementById('guideScreen').classList.remove('hidden');
+            
+            if (context === 'main') {
+                document.getElementById('mainScreen').classList.add('hidden');
+            } else {
+                document.getElementById('initialScreen').classList.add('hidden');
+            }
+        }
+
+        // 关闭指引
+        function closeGuide() {
+            document.getElementById('guideScreen').classList.add('hidden');
+            document.getElementById('initialScreen').classList.remove('hidden');
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            
+            // 加载保存的用户设置
+            if (currentUser && currentUser.settings) {
+                if (currentUser.settings.theme) {
+                    changeTheme(currentUser.settings.theme);
+                    document.getElementById('themeColor').value = currentUser.settings.theme;
+                }
+                
+                if (currentUser.settings.fontSize) {
+                    changeFontSize(currentUser.settings.fontSize);
+                    document.getElementById('fontSize').value = currentUser.settings.fontSize;
+                    document.getElementById('fontSizeDisplay').textContent = currentUser.settings.fontSize + 'px';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
